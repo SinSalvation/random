@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="war" name="com-byteslounge-websockets:war">
-    <output-path>$PROJECT_DIR$/target</output-path>
-    <root id="archive" name="randomheroes.war">
-      <element id="artifact" artifact-name="com-byteslounge-websockets:war exploded" />
-    </root>
-  </artifact>
-</component>
