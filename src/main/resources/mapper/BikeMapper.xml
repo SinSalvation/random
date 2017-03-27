@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.randomheroes.dao.BikeMapper">
+    <resultMap id="BaseResultMap" type="org.randomheroes.bean.Bike">
+        <id column="bike_id" property="bike_id" jdbcType="INTEGER"/>
+        <result column="price" property="price" jdbcType="INTEGER"/>
+        <result column="addrx" property="addrx" jdbcType="CHAR"/>
+        <result column="addry" property="addry" jdbcType="CHAR"/>
+        <result column="code" property="code" jdbcType="INTEGER"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+      bike_id, price, addrx, addry, code
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from bike
+        where bike_id = #{bike_id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from bike
+    where bike_id = #{bike_id,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="org.randomheroes.bean.Bike">
+    insert into bike (bike_id, price, addrx, addry, code)
+    values (#{bike_id,jdbcType=INTEGER}, #{price,jdbcType=INTEGER}, #{addrx,jdbcType=CHAR},
+      #{addry,jdbcType=CHAR}, #{code,jdbcType=INTEGER})
+  </insert>
+    <update id="updateByPrimaryKey" parameterType="org.randomheroes.bean.Bike">
+    update book
+    set price = #{price,jdbcType=INTEGER},
+      addrx = #{addrx,jdbcType=CHAR},
+      addry = #{addry,jdbcType=CHAR},
+      code = #{code,jdbcType=INTEGER}
+    where bike_id = #{bike_id,jdbcType=INTEGER}
+  </update>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from bike
+    </select>
+</mapper>

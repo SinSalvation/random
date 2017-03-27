@@ -3,18 +3,32 @@ package org.randomheroes.websockets;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
+import org.randomheroes.bean.Bike;
+import org.randomheroes.bean.Order;
 import org.randomheroes.bean.Response;
 import org.randomheroes.bean.User;
+import org.randomheroes.dao.BikeMapper;
+import org.randomheroes.dao.OrderMapper;
+import org.randomheroes.dao.UserMapper;
+import org.randomheroes.util.UserUtil;
+import org.springframework.web.context.ContextLoader;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Connect extends TextWebSocketHandler {
     private Logger loginLog = Logger.getLogger("login");
     private Logger connectLog = Logger.getLogger("connect");
     private Logger logoutLog = Logger.getLogger("logout");
     private Logger errorLog = Logger.getLogger("error");
+
+    private UserMapper userMapper = (UserMapper)ContextLoader.getCurrentWebApplicationContext().getBean("userMapper");
+    private BikeMapper bikeMapper = (BikeMapper)ContextLoader.getCurrentWebApplicationContext().getBean("bikeMapper");
+    private OrderMapper orderMapper = (OrderMapper)ContextLoader.getCurrentWebApplicationContext().getBean("orderMapper");
 
     //接收到客户端消息时调用
     @Override
@@ -26,24 +40,40 @@ public class Connect extends TextWebSocketHandler {
                 case "login" : {
                     User user = JSONObject.toJavaObject((JSON) accept.get("user"), User.class);
                     Response<User> json = new Response<>();
-                    if(user.getUsername().equals("111")){
+                    json.setMethod("login");
+                    if(UserUtil.login(user.getUser_id(),user.getPassword(),user.getUsername())){
                         loginLog.info("session id: " + session.getId());   //id与帐号存redis
-                        user .setUid("1");
-                        json.setMethod("login");
+                        userMapper.insert(user);
                         json.setCode("200");
                         json.setMessage("login success");
                         json.setT(user);
-                        session.sendMessage(new TextMessage(JSON.toJSONString(json)));
                     } else {
-                        json.setMethod("login");
                         json.setCode("500");
                         json.setMessage("login fail");
-                        session.sendMessage(new TextMessage(JSON.toJSONString(json)));
                     }
+                    session.sendMessage(new TextMessage(JSON.toJSONString(json)));
+                    break;
+                }
+                case "find":{
+                    ArrayList<Bike> bikes = (ArrayList)bikeMapper.selectAll();
+                    Response<ArrayList<Bike>> json = new Response<>();
+                    json.setMethod("find");
+                    json.setCode("200");
+                    json.setMessage("find success");
+                    json.setT(bikes);
+                    session.sendMessage(new TextMessage(JSON.toJSONString(json)));
+                    break;
+                }
+                case "start":{
+                    break;
+                }
+                case "end":{
+                    break;
                 }
             }
         } catch (Exception e){
             loginLog.info("login error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

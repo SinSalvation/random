@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.randomheroes.dao.UserMapper">
+    <resultMap id="BaseResultMap" type="org.randomheroes.bean.User" >
+        <id column="user_id" property="user_id" jdbcType="CHAR" />
+        <result column="username" property="username" jdbcType="CHAR" />
+        <result column="password" property="password" jdbcType="CHAR" />
+    </resultMap>
+    <sql id="Base_Column_List" >
+        user_id, username, password
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+        select
+        <include refid="Base_Column_List" />
+        from user where user_id = #{user_id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+        delete from user where user_id = #{user_id,jdbcType=CHAR}
+    </delete>
+    <insert id="insert" parameterType="org.randomheroes.bean.User" >
+        insert into user (user_id,username, password)
+        values ( #{user_id,jdbcType=CHAR}, #{username,jdbcType=CHAR}, #{password,jdbcType=CHAR})
+    </insert>
+</mapper>

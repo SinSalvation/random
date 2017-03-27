@@ -17,7 +17,8 @@
 		function onClose(evt) { 
 			console.log("Disconnected"); 
 		} 
-		function onMessage(evt) {  
+		function onMessage(evt) {
+			console.log(evt.data); 
 			var result = JSON.parse(evt.data); //解析数据
 			switch(result.code) { //获取状态码
 				case "200": {
@@ -28,8 +29,16 @@
 						}
 						case "login": {
 							var user = result.t;
-							console.log('uid: ' + user.uid); //获取用户id
+							console.log('user_id: ' + user.user_id); //获取用户id
 							break;
+						}
+						case "find": {
+							var list = result.t;
+							for(var i=0;i<list.length;i++) {
+								console.log("find: " + list[i].bike_id); 
+								console.log("find: " + list[i].addrx); 
+								console.log("find: " + list[i].addry); 
+							}
 						}
 					}
 					break;
@@ -46,8 +55,9 @@
 	}
 	function submit() {  
 		var user = new Object(); //建立内层对象
-		user.username = "111";
-		user.password = "111";
+		user.user_id = "02240130209";
+		user.username = "季旭";
+		user.password = "13174452";
 		var json = new Object(); //建立外层对象
 		json.method = "login"; //调用的方法名
 		json.user = user;	
@@ -59,10 +69,22 @@
 			websocket.send(message);
 		}
 	} 
+	function find(){
+		var json = new Object(); //建立外层对象
+		json.method = "find"; //调用的方法名
+		var message = JSON.stringify(json);
+		if (websocket != null) { 					
+			websocket.send(message); //发送数据
+		} else {
+			connect(); //断线重连
+			websocket.send(message);
+		}
+	}
     </script>
 </head>
 <body>
 <button onclick="connect()">connect</button>
 <button onclick="submit()">submit</button>
+<button onclick="find()">find</button>
 </body>
 </html>

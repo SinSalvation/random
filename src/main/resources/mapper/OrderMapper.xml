@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.randomheroes.dao.OrderMapper" >
+  <resultMap id="BaseResultMap" type="org.randomheroes.bean.Order" >
+    <id column="order_id" property="order_id" jdbcType="INTEGER" />
+    <result column="user_id" property="user_id" jdbcType="CHAR" />
+    <result column="bike_id" property="bike_id" jdbcType="INTEGER" />
+    <result column="time" property="time" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    order_id, user_id, bike_id, time
+  </sql>
+  <select id="selectBike" parameterType="java.lang.Integer" resultType="org.randomheroes.bean.Bike">
+    select bike_id,price,addrx,addry,code from bike where bike_id = #{bike_id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from orders
+    where order_id = #{order_id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from orders
+    where order_id = #{order_id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="org.randomheroes.bean.Order" >
+    insert into orders (order_id, user_id, bike_id,time)
+    values (#{order_id,jdbcType=INTEGER}, #{user_id,jdbcType=CHAR}, #{bike_id,jdbcType=INTEGER},
+      #{time,jdbcType=INTEGER})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="org.randomheroes.bean.Order" >
+    update orders
+    set time = #{time,jdbcType=INTEGER}
+    where order_id = #{order_id,jdbcType=INTEGER}
+  </update>
+  <select id="selectAll" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from orders
+  </select>
+  <select id="selectByUserId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from orders
+    where user_id = #{user_id,jdbcType=CHAR}
+  </select>
+</mapper>
