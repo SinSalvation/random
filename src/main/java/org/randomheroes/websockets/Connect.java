@@ -65,9 +65,27 @@ public class Connect extends TextWebSocketHandler {
                     break;
                 }
                 case "start":{
+                    Bike bike = JSONObject.toJavaObject((JSON) accept.get("bike"), Bike.class);
+                    bike = bikeMapper.selectByPrimaryKey(bike.getBike_id());
+                    Response<Bike> json = new Response<>();
+                    json.setMethod("start");
+                    json.setCode("200");
+                    json.setMessage("start success");
+                    json.setT(bike);
+                    session.sendMessage(new TextMessage(JSON.toJSONString(json)));
+                    bike.setAddrx("0");
+                    bike.setAddry("0");
+                    bikeMapper.updateByPrimaryKey(bike);
                     break;
                 }
                 case "end":{
+                    Bike bike = JSONObject.toJavaObject((JSON) accept.get("bike"), Bike.class);
+                    bikeMapper.updateByPrimaryKey(bike);
+                    Response<Object> json = new Response<>();
+                    json.setMethod("end");
+                    json.setCode("200");
+                    json.setMessage("end success");
+                    session.sendMessage(new TextMessage(JSON.toJSONString(json)));
                     break;
                 }
             }
