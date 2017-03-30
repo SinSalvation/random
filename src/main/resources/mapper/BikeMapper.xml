@@ -14,29 +14,27 @@
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
         select
         <include refid="Base_Column_List"/>
-        from bike
+        from bikes
         where bike_id = #{bike_id,jdbcType=INTEGER}
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
-    delete from bike
+    delete from bikes
     where bike_id = #{bike_id,jdbcType=INTEGER}
   </delete>
     <insert id="insert" parameterType="org.randomheroes.bean.Bike">
-    insert into bike (bike_id, price, addrx, addry, code)
+    insert into bikes (bike_id, price, addrx, addry, code)
     values (#{bike_id,jdbcType=INTEGER}, #{price,jdbcType=INTEGER}, #{addrx,jdbcType=CHAR},
       #{addry,jdbcType=CHAR}, #{code,jdbcType=INTEGER})
   </insert>
     <update id="updateByPrimaryKey" parameterType="org.randomheroes.bean.Bike">
-    update book
-    set price = #{price,jdbcType=INTEGER},
-      addrx = #{addrx,jdbcType=CHAR},
-      addry = #{addry,jdbcType=CHAR},
-      code = #{code,jdbcType=INTEGER}
+    update bikes
+    set addrx = #{addrx,jdbcType=CHAR},
+      addry = #{addry,jdbcType=CHAR}
     where bike_id = #{bike_id,jdbcType=INTEGER}
   </update>
     <select id="selectAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List" />
-        from bike
+        from bikes
     </select>
 </mapper>

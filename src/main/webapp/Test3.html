@@ -1,0 +1,90 @@
+<html>
+<head>
+    <title>Test</title>
+	<meta http-equiv="Access-Control-Allow-Origin" content="*">
+	<script type="text/javascript" src="jsoneditor.min.js"></script>
+    <script type="text/javascript">
+	var  wsServer = 'ws://127.0.0.1:8080/randomheroes'; 
+	var  websocket = null; 
+	function connect() {
+		websocket = new WebSocket(wsServer); 
+		websocket.onopen = function (evt) { onOpen(evt) }; 
+		websocket.onmessage = function (evt) { onMessage(evt) }; 
+		websocket.onerror = function (evt) { onError(evt) }; 
+		function onOpen(evt) { 
+			console.log("Connected to WebSocket server."); 
+		} 
+		function onClose(evt) { 
+			console.log("Disconnected"); 
+		} 
+		function onMessage(evt) {
+			console.log(evt.data); 
+			var result = JSON.parse(evt.data); //解析数据
+			switch(result.code) { //获取状态码
+				case "200": {
+					switch(result.method) { //获取请求方法
+						case "connect": {
+							console.log("connect"); 
+							break;
+						}
+						case "login": {
+							var user = result.t;
+							console.log('user_id: ' + user.user_id); //获取用户id
+							break;
+						}
+						case "find": {
+							var list = result.t;
+							for(var i=0;i<list.length;i++) {
+								console.log("find: " + list[i].bike_id); 
+								console.log("find: " + list[i].addrx); 
+								console.log("find: " + list[i].addry); 
+							}
+						}
+					}
+					break;
+				}
+				case "500": {
+					console.log("error :" + result.message); //获取错误状态信息
+					break;
+				}
+			} 
+		} 
+		function onError(evt) { 
+			console.log('Error occured: ' + evt.data); 
+		}
+	}
+	function submit() {  
+		var user = new Object(); //建立内层对象
+		user.user_id = "02240130209";
+		user.username = "季旭";
+		user.password = "13174452";
+		var json = new Object(); //建立外层对象
+		json.method = "login"; //调用的方法名
+		json.user = user;	
+		var message = JSON.stringify(json);
+		if (websocket != null) { 					
+			websocket.send(message); //发送数据
+		} else {
+			connect(); //断线重连
+			websocket.send(message);
+		}
+	} 
+	function find(){
+		var json = new Object(); //建立外层对象
+		json.method = "find"; //调用的方法名
+		var message = JSON.stringify(json);
+		if (websocket != null) { 					
+			websocket.send(message); //发送数据
+		} else {
+			connect(); //断线重连
+			websocket.send(message);
+		}
+	}
+    </script>
+</head>
+<body>
+<button onclick="connect()">connect</button>
+<button onclick="submit()">submit</button>
+<button onclick="find()">find</button>
+</body>
+</html>

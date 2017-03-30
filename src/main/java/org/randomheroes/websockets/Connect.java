@@ -18,9 +18,9 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Connect extends TextWebSocketHandler {
+
     private Logger loginLog = Logger.getLogger("login");
     private Logger connectLog = Logger.getLogger("connect");
     private Logger logoutLog = Logger.getLogger("logout");
@@ -28,7 +28,7 @@ public class Connect extends TextWebSocketHandler {
 
     private UserMapper userMapper = (UserMapper)ContextLoader.getCurrentWebApplicationContext().getBean("userMapper");
     private BikeMapper bikeMapper = (BikeMapper)ContextLoader.getCurrentWebApplicationContext().getBean("bikeMapper");
-    private OrderMapper orderMapper = (OrderMapper)ContextLoader.getCurrentWebApplicationContext().getBean("orderMapper");
+//    private OrderMapper orderMapper = (OrderMapper)ContextLoader.getCurrentWebApplicationContext().getBean("orderMapper");
 
     //接收到客户端消息时调用
     @Override
@@ -42,7 +42,6 @@ public class Connect extends TextWebSocketHandler {
                     Response<User> json = new Response<>();
                     json.setMethod("login");
                     if(UserUtil.login(user.getUser_id(),user.getPassword(),user.getUsername())){
-                        loginLog.info("session id: " + session.getId());   //id与帐号存redis
                         userMapper.insert(user);
                         json.setCode("200");
                         json.setMessage("login success");
@@ -67,15 +66,15 @@ public class Connect extends TextWebSocketHandler {
                 case "start":{
                     Bike bike = JSONObject.toJavaObject((JSON) accept.get("bike"), Bike.class);
                     bike = bikeMapper.selectByPrimaryKey(bike.getBike_id());
+                    bike.setAddrx("0");
+                    bike.setAddry("0");
+                    bikeMapper.updateByPrimaryKey(bike);
                     Response<Bike> json = new Response<>();
                     json.setMethod("start");
                     json.setCode("200");
                     json.setMessage("start success");
                     json.setT(bike);
                     session.sendMessage(new TextMessage(JSON.toJSONString(json)));
-                    bike.setAddrx("0");
-                    bike.setAddry("0");
-                    bikeMapper.updateByPrimaryKey(bike);
                     break;
                 }
                 case "end":{
