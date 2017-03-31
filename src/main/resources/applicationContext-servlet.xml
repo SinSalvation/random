@@ -12,7 +12,7 @@
     <bean id="ConnectHandler" class="org.randomheroes.websockets.Connect"/>
     <websocket:handlers allowed-origins="*">
         <!-- 配置消息处理bean和路径的映射关系 -->
-        <websocket:mapping path="/randomheroes" handler="ConnectHandler"/>
+        <websocket:mapping path="/bike" handler="ConnectHandler"/>
         <!-- 配置握手拦截器 -->
         <websocket:handshake-interceptors>
             <bean class="org.randomheroes.websockets.Interceptor"/>
