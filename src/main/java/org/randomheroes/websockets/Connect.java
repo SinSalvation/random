@@ -37,6 +37,14 @@ public class Connect extends TextWebSocketHandler {
             loginLog.info("session message: " + message.getPayload());
             JSONObject accept = JSON.parseObject(message.getPayload());
             switch (accept.get("method").toString()){
+                case "submit" : {
+                    Response<Object> json = new Response<>();
+                    json.setMethod("submit");
+                    json.setCode("200");
+                    json.setMessage("submit success");
+                    session.sendMessage(new TextMessage(JSON.toJSONString(json)));
+                    break;
+                }
                 case "login" : {
                     User user = JSONObject.toJavaObject((JSON) accept.get("user"), User.class);
                     Response<User> json = new Response<>();

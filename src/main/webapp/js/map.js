@@ -7,7 +7,7 @@ var json;
 var content;
 var infowindow;
 //初始化地图对象，加载地图
-var map = new AMap.Map("container", {
+var marker, map = new AMap.Map("container", {
     resizeEnable: true,
     zoomEnable: false,
     dragEnable: false,
@@ -23,25 +23,22 @@ map.plugin('AMap.Geolocation', function () {
     });
     map.addControl(geolocation);
     geolocation.getCurrentPosition();
+    AMap.event.addListener(geolocation, 'complete', onComplete);
 });
-var markers = [{
-    icon: 'http://webapi.amap.com/theme/v1.3/markers/n/mark_b1.png',
-    position: [116.206053, 39.910266]
-}, {
-    icon: 'http://webapi.amap.com/theme/v1.3/markers/n/mark_b2.png',
-    position: [116.205477, 39.909661]
-}, {
-    icon: 'http://webapi.amap.com/theme/v1.3/markers/n/mark_b3.png',
-    position: [116.206401, 39.910106]
-}];
-markers.forEach(function (marker) {
-    new AMap.Marker({
-        map: map,
-        icon: marker.icon,
-        position: [marker.position[0], marker.position[1]],
-        offset: new AMap.Pixel(-12, -36)
+function addMarker(i,addrx,addry) {
+    marker = new AMap.Marker({
+        icon: 'http://webapi.amap.com/theme/v1.3/markers/n/mark_b'+(i+1)+'.png',
+        position: [addrx,addry]
     });
-});
+    marker.setMap(map);
+}
+function onComplete(data) {
+    if(bike!=null){
+        console.log("complete");
+        bike.addrx = data.position.getLng();
+        bike.addry = data.position.getLat();
+    }
+}
 function connect() {
     websocket = new WebSocket(wsServer);
     websocket.onopen = function (evt) {
@@ -64,11 +61,10 @@ function connect() {
         switch (result.code) { //获取状态码
             case "200":{
                 switch (result.method) { //获取请求方法
-                    case "connect":{
-                        console.log("connect");
+                    case "submit":{
                         if(user!=null){
                             content='<div class="info-title">校园租车</div><div class="info-content"><table cellpadding="0">' +
-                            '<tr><td class="input-label">车牌号</td><td><div class="keyword-input"><input id="user_id" class="keyword" type="text"></div></td></tr>' +
+                            '<tr><td class="input-label">车牌号</td><td><div class="keyword-input"><input id="bike_id" class="keyword" type="text"></div></td></tr>' +
                             '<tr><td><div class="button-group"><button class="button" onclick="start()" value="确认用车">确认用车</button></div></td></tr></table></div>';
                             infowindow = new AMap.InfoWindow({
                                 content: content
@@ -79,7 +75,7 @@ function connect() {
                             '<tr><td class="input-label">学号</td><td><div class="keyword-input"><input id="user_id" class="keyword" type="text"></div></td></tr>' +
                             '<tr><td class="input-label">密码</td><td><div class="keyword-input"><input id="password" class="keyword" type="password"></div></td></tr>' +
                             '<tr><td class="input-label">姓名</td><td><div class="keyword-input"><input id="username" class="keyword" type="text"></div></td></tr>' +
-                            '<tr><td><div class="button-group"><button class="button" onclick="submit()" value="登录">登录</button></div></td></tr></table></div>';
+                            '<tr><td><div class="button-group"><button class="button" onclick="login()" value="登录">登录</button></div></td></tr></table></div>';
                             infowindow = new AMap.InfoWindow({
                                 content: content
                             });
@@ -89,34 +85,55 @@ function connect() {
                     }
                     case "login":{
                         user = result.t;
-                        console.log('user_id: ' + user.user_id); //获取用户id
                         find();
                         break;
                     }
                     case "find":{
                         list = result.t;
                         for (var i = 0; i < list.length; i++) {
-                            console.log("find: " + list[i].bike_id);
-                            console.log("find: " + list[i].addrx);
-                            console.log("find: " + list[i].addry);
-                            markers.push("");
+                            addMarker(i,list[i].addrx,list[i].addry);
                         }
                         break;
                     }
                     case "start":{
                         bike = result.t;
-                        console.log("start: " + bike.bike_id);
-                        console.log("start: " + bike.code);
+                        content='<div class="info-title">校园租车</div><div class="info-content"><table cellpadding="0">' +
+                        '<tr><td class="input-label">密码</td><td class="input-label">'+bike.code+'</td></tr>' +
+                        '<tr><td><div class="button-group"><button class="button" onclick="end()" value="结束用车">结束用车</button></div></td></tr></table></div>';
+                        infowindow = new AMap.InfoWindow({
+                            content: content
+                        });
+                        infowindow.open(map,map.getCenter());
+                        var button = document.getElementById("button");
+                        button.innerHTML="结束用车";
+                        button.onclick=end();
                         break;
                     }
                     case "end":{
-                        console.log("end");
+                        var button = document.getElementById("button");
+                        button.innerHTML="点击用车";
+                        button.onclick=submit();
+                        find();
                         break;
                     }
                 }
                 break;
             }
             case "500":{
+                switch (result.method) { //获取请求方法
+                    case "login":{
+                        content='<div class="info-title">校园租车</div><div class="info-content"><table cellpadding="0">' +
+                        '<tr><td class="input-label">学号</td><td><div class="keyword-input"><input id="user_id" class="keyword" type="text"></div></td></tr>' +
+                        '<tr><td class="input-label">密码</td><td><div class="keyword-input"><input id="password" class="keyword" type="password"></div></td></tr>' +
+                        '<tr><td class="input-label">姓名</td><td><div class="keyword-input"><input id="username" class="keyword" type="text"></div></td></tr>' +
+                        '<tr><td class="input-label">错误信息</td><td class="input-label">用户名或密码错误</td></tr>' +
+                        '<tr><td><div class="button-group"><button class="button" onclick="login()" value="登录">登录</button></div></td></tr></table></div>';
+                        infowindow = new AMap.InfoWindow({
+                            content: content
+                        });
+                        infowindow.open(map,map.getCenter());
+                    }
+                }
                 console.log("error :" + result.message); //获取错误状态信息
                 break;
             }
@@ -126,11 +143,23 @@ function connect() {
         console.log('Error occured: ' + evt.data);
     }
 }
-function submit() {
+function submit(){
+    json = new Object(); //建立外层对象
+    json.method = "submit"; //调用的方法名
+    var message = JSON.stringify(json);
+    if (websocket != null) {
+        websocket.send(message); //发送数据
+    } else {
+        connect(); //断线重连
+        websocket.send(message);
+    }
+}
+function login() {
+    infowindow.close();
     user = new Object(); //建立内层对象
-    user.user_id = "02240130209";
-    user.username = "季旭";
-    user.password = "13174452";
+    user.user_id = document.getElementById("user_id").value;
+    user.username = document.getElementById("username").value;
+    user.password = document.getElementById("password").value;
     json = new Object(); //建立外层对象
     json.method = "login"; //调用的方法名
     json.user = user;
@@ -154,8 +183,9 @@ function find() {
     }
 }
 function start() {
+    infowindow.close();
     bike = new Object(); //建立内层对象
-    bike.bike_id = "111111";
+    bike.bike_id = document.getElementById("bike_id").value;
     json = new Object(); //建立外层对象
     json.method = "start"; //调用的方法名
     json.bike = bike;
@@ -168,8 +198,7 @@ function start() {
     }
 }
 function end() {
-    bike.addrx = "116.205467";
-    bike.addry = "39.907761";
+    infowindow.close();
     json = new Object(); //建立外层对象
     json.method = "end"; //调用的方法名
     json.bike = bike;
@@ -181,3 +210,5 @@ function end() {
         websocket.send(message);
     }
 }
+connect();
+find();
